@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db { //declares the database 
+  provider = "postgresql" // 
+}
+
+enum GameStatus { // Create status values
+  BACKLOG
+  PLAYING
+  FINISHED
+  DROPPED
+}
+
+model User { //User database table
+  id String @id @default(cuid()) //primary key (prisma auot generates uniquie string id)
+  email String @unique // unique user email
+  username String @unique //user username
+  userGames UserGame[] //User's games library
+  list List[] //Users custom list
+  createdAt DateTime @default(now()) //Date user was created (default to now)
+  updatedAt DateTime @updatedAt //Automatically update whenever row changes
+}
+
+model Game { //Game database table
+  id String @id @default(cuid()) //primary  key id
+  title String //Game title
+  coverUrl String? //optional cover art URL (can be null)
+
+  description String? //null for now
+  releaseDate DateTime? //null for now
+  developer String? //null for now
+
+  ListItem ListItem[] //One game per custom List
+  userGames UserGame[] //one game can appear in many users lists
+  createdAt DateTime @default(now()) //Date game was created (default to now)
+  updatedAt DateTime @updatedAt //Automatically update whenever row changes
+}
+
+model UserGame { //Joined game and user table
+  id String @id @default(cuid()) //primary key id for this library entry
+  userId String //Foreign key pointing to User.id
+  gameId String //Foreign key pointing to Game.id
+  status GameStatus @default(BACKLOG) //default a games status to BACKLOG
+  platform String? //optional platform specification string
+  hoursPlayed Int @default(0) // Number of hours played (default to 0)
+  progressPct Int @default(0) //Progress percentage (default to 0)
+
+  user User @relation(fields: [userId], references: [id]) //Defines relation + FK details to User
+  game Game @relation(fields: [gameId], references: [id]) //Defines relation + FK details to Game
+  
+  createdAt DateTime @default(now()) //Date created (default to now)
+  updatedAt DateTime @updatedAt //Automatically update whenever row changes
+
+  @@unique([userId, gameId]) //Enforces: a user can only have a given game once in thier library
+}
+
+model List { //User created list
+  id String @id @default(cuid()) //unique list id
+  userId String //User who owns the list
+  name String //Name of the list
+  descirption String? //optional description for the list
+  isPublic Boolean //Ability to set list public or not
+  createdAt DateTime @default(now()) //When the list was created
+  updatedAt DateTime @updatedAt //Time it was updatedAt
+
+  user User @relation(fields: [userId], references: [id]) //connect list -> user
+  items ListItem[] //All items that belong to this list
+}
+
+model ListItem { // Join table: Games inside list
+  id String @id @default(cuid()) //Row id //IF MIGRATION ERROS I JUST ADDED @id
+  listId String //Foreign key of which custom list (list.id)
+  gameId String //Foreign key of which game in row (game.id)
+  position Int? //Optional ordering later (drag/drop, manual sort)
+  createdAt DateTime @default(now()) //Time created
+
+  list List @relation(fields: [listId], references: [id]) //connect item to list
+  game Game @relation(fields: [gameId], references: [id]) //connects item to game
+
+  @@unique([listId, gameId]) //Prevent duplicates of the same game in one list
+}
+
