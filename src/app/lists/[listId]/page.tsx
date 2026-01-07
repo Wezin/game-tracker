@@ -93,6 +93,10 @@ export default async function DisplayList(
                                             "-" //placeholder if theses stats dont exist 
                                         )
                                         }
+                                        <form action={removeGameFromList}> {/* Delete game option*/}
+                                            <input type="hidden" name="listId" value={listId}/>
+                                            <button type="submit" name="gameId" value={ug?.gameId} className="text-sm text-gray-500 underline">Delete Game</button>
+                                        </form>    
                                     </div>
                                 </div>
                             </li>

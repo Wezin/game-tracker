@@ -1,7 +1,7 @@
 "use server"; 
 
 import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/currentUser";
 
 //Create custom list
@@ -82,6 +82,26 @@ export async function removeGameFromList(formData: FormData){
         where: { listId, gameId}
     })
 
-    //redirect(`/lists/@listId`);
+    redirect(`/lists/${listId}`);
 }
 
+//Delete list
+export async function removeList(formData: FormData){
+    const listId = String(formData.get("listId")).trim(); 
+    
+
+    const user = await getCurrentUser();
+
+    // const listToBeDeleted = await prisma.list.findFirst({
+    //     where: {id: listId, userId: user.id},
+    // })
+
+    // if(!listToBeDeleted) notFound(); //if list not found, 404
+
+    await prisma.list.deleteMany({
+        where: { id: listId, userId: user.id}
+    });
+
+    redirect("/lists");
+
+}
