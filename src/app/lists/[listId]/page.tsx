@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation"; //show 404 page
 import { getCurrentUser } from "@/lib/currentUser";
 import { removeGameFromList } from "@/app/actions/lists";
-import { GameStatus } from "@prisma/client";
 
 
 export default async function DisplayList(
@@ -68,7 +67,8 @@ export default async function DisplayList(
                             <li key={item.id} className="rounded border p-4">
                                 <div className="flex items-start justify-between"> 
                                     <div> {/* left side */}
-                                        <div className="text-lg font-semibold">{item.game.title}</div> {/* Game Title */}
+                                        <Link className="text-lg font-semibold" href={`/games/${item.game.id}`}>{item.game.title}</Link> {/* Game Title */}
+                                        
 
                                         <div className="mt-1 text-sm text-gray-500"> {/* game status/platform */}
                                             {ug ? 
@@ -95,7 +95,7 @@ export default async function DisplayList(
                                         }
                                         <form action={removeGameFromList}> {/* Delete game option*/}
                                             <input type="hidden" name="listId" value={listId}/>
-                                            <button type="submit" name="gameId" value={ug?.gameId} className="text-sm text-gray-500 underline">Delete Game</button>
+                                            <button type="submit" name="gameId" value={ug?.gameId} className="text-sm text-gray-500 underline cursor-pointer">Delete Game</button>
                                         </form>    
                                     </div>
                                 </div>

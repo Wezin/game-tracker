@@ -56,7 +56,7 @@ export async function addGameToList(formData: FormData){
 
     console.log(temp.gameId + " was added")
 
-    //redirect(`/lists/@listId`); //After form is filled i dont need it to redirect anywhere for now
+    redirect(`/lists/${listId}/add`); //After form is filled i dont need it to redirect anywhere for now
 }
 
 //Delete game from list
@@ -92,15 +92,23 @@ export async function removeList(formData: FormData){
 
     const user = await getCurrentUser();
 
-    // const listToBeDeleted = await prisma.list.findFirst({
-    //     where: {id: listId, userId: user.id},
-    // })
+    //Get list
+    const listToBeDeleted = await prisma.list.findFirst({
+        where: {id: listId, userId: user.id},
+    })
 
-    // if(!listToBeDeleted) notFound(); //if list not found, 404
+    //Run multiple db operations
+    await prisma.$transaction([
+        //Deletes items is so to be deleted list
+        prisma.listItem.deleteMany({
+            where: { listId: listToBeDeleted?.id },
+        }),
 
-    await prisma.list.deleteMany({
-        where: { id: listId, userId: user.id}
-    });
+        //Delete list itself
+        prisma.list.deleteMany({
+            where: {id: listToBeDeleted?.id, userId: user.id},
+        })
+    ])
 
     redirect("/lists");
 

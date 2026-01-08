@@ -48,7 +48,7 @@ export default function addListForm(){
                         />
                     Private</label> 
                 </fieldset>
-                <button className="rounded bg-black px-4 py-2 text-white">Create List</button>
+                <button className="rounded bg-black px-4 py-2 text-white cursor-pointer">Create List</button>
             </form>
         </main>
 

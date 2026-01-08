@@ -2,6 +2,7 @@
 
 import { useActionState } from "react"; 
 import { addGameToLibrary } from "@/app/actions/library"; //import addGameToLibrary function to be called later
+import BackButton from "@/app/games/BackButton";
 
 const initialState = {ok: true, error: null as string | null}; //initial state before submit
 
@@ -10,7 +11,11 @@ export default function AddGamePage() { //Create page
 
     return( //Page details
         <main className="p-8"> {/* Page container padded*/}
-            <h1 className="text-2xl font-bold">Add a Game</h1> {/* Page Title */}
+            <div>
+                <h1 className="text-2xl font-bold">Add a Game</h1> {/* Page Title */}
+                <BackButton/>
+            </div>
+            
 
             <form action={formAction} className="mt-6 space-y-4 max-w-md"> {/*Send form data to addGameLibrary function*/}
                 <div> {/* Title input details */}

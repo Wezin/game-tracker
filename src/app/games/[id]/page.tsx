@@ -1,6 +1,7 @@
 import Link from "next/link"; //Ability to use links
 import { prisma } from "@/lib/prisma"; //Pull from database
 import { notFound } from "next/navigation"; //show 404 page
+import BackButton from "../BackButton";
 
 export default async function GamePage(
     { params }: { params: Promise<{ id: string }> }
@@ -19,7 +20,8 @@ export default async function GamePage(
         <main className="p-8 space-y-4"> {/*  */}
             <div className="flex items-center justify-between"> {/* Header Display */}
                 <h1 className="text-2xl font-bold">{game.title}</h1> {/* Game Title */}
-                <Link className="underline text-sm" href="/library"> Return to Library</Link> {/* Return Link */}
+                <BackButton/>
+                
             </div> 
 
             <div className="rounded border p-4 space-y-2"> {/* Game info section */}
