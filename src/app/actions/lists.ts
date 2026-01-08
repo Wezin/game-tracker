@@ -47,14 +47,20 @@ export async function addGameToList(formData: FormData){
         throw new Error("List not found");
     }
 
+    //get current list to assign new game position
+    const currentListItems = await prisma.listItem.findMany({
+        where: {id: listId},
+        
+    })
+
+    console.log("Position: " + currentListItems);
     const temp = await prisma.listItem.create({ //insert game into list
         data: {
             listId,
             gameId,
+            position: currentListItems.length,
         },
     });  
-
-    console.log(temp.gameId + " was added")
 
     redirect(`/lists/${listId}/add`); //After form is filled i dont need it to redirect anywhere for now
 }

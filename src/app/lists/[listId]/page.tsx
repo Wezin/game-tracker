@@ -44,14 +44,12 @@ export default async function DisplayList(
         userGames.map((ug) => [ug.gameId, ug])
     )
     
-   
-    //FOR NOW ONLY SHOWING THE GAME TITLE
     return(
         <main className="p-8">
             <div className=""> {/* Header */}
                 <h1 className="text-2xl font-bold">{list.name}</h1>
                 <p className="text-sm text-gray-500">{list.descirption ?? "No description"}</p>
-                <Link className="text-sm text-gray-500 underline" href={"/lists"}>Go Back</Link>
+                <Link className="text-sm text-gray-500 underline" href={"/lists"}>Your Lists</Link>
             </div>
 
             {/* Games in list display */}
@@ -62,7 +60,6 @@ export default async function DisplayList(
                 <ul className="mt-6 space-y-3">
                     {list.items.map((item) => {
                         const ug = userGameByGameId.get(item.gameId); //Current 
-
                         return (
                             <li key={item.id} className="rounded border p-4">
                                 <div className="flex items-start justify-between"> 

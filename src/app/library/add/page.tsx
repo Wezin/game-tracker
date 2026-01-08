@@ -47,13 +47,13 @@ export default function AddGamePage() { //Create page
                         className="mt-1 w-full rounded border p-2"
                         defaultValue="BACKLOG" //set default option to BACKLOG
                     >   {/* Drop down options */}
-                        <option value="BACKLOG">Backlog</option>
-                        <option value="PLAYING">Playing</option>
-                        <option value="FINISHED">Finished</option>
-                        <option value="DROPPED">Dropped</option>
+                        <option value="BACKLOG" className="text-black">Backlog</option>
+                        <option value="PLAYING" className="text-black">Playing</option>
+                        <option value="FINISHED" className="text-black">Finished</option>
+                        <option value="DROPPED" className="text-black">Dropped</option>
                     </select>
                 </div>
-                <button className="rounded bg-black px-4 py-2 text-white" disabled={isPending}> 
+                <button className="rounded bg-black px-4 py-2 text-white cursor-pointer" disabled={isPending}> 
                 {isPending ? "Adding..." : "Add To Library"}  {/* Shows loading text while submitting */}
                 </button> {/* Submit form button */}
             </form>

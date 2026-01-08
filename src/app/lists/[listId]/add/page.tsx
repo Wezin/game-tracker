@@ -75,8 +75,6 @@ export default async function AddGameToListPage(
                         })}
                     </ul>
                 )}
-
-
         </main>
 
     )
