@@ -4,15 +4,13 @@ import { prisma } from "@/lib/prisma"; //import Prisma client so we can talk to 
 import { GameStatus } from "@prisma/client" //import statuses from db
 import { redirect } from "next/navigation"; // Redirects the uiser to another page after certain action finishes
 import {randomUUID} from "crypto" //built in node fucntion to generate unique IDs
+import { requireCurrentUser } from "@/lib/currentUser";
 
 type AddGameState = {ok: boolean; error: string | null}; //Defines the state your form receives back from the actions
 
-const DEMO_EMAIL = "demo@gametracker.local"; //temp fake login 
-const DEMO_USERNAME = "demo"; // Temporary username for the demo user
-
 export async function addGameToLibrary(prevState: AddGameState, formData: FormData): Promise<AddGameState>{ //Runs when a form submits with actions
     const title = String(formData.get("title") || "").trim(); //Get title from form and remove extra spaces
-    const platform = String(formData.get("platform") || "").trim(); //Get platform form the form
+    const platform = String(formData.get("platform") || null).trim(); //Get platform form the form
     const rawStatus = String(formData.get("status") || "BACKLOG").trim(); //Gets status typed from user, defaults to BACKLOG if empty
     if (!title) { //if not title
         return {ok: false, error: "Title is required"}; //return error instead of throwing
@@ -22,13 +20,7 @@ export async function addGameToLibrary(prevState: AddGameState, formData: FormDa
             ? (GameStatus as any)[rawStatus] //Convert string to enum value if does
             : GameStatus.BACKLOG; //if invalid, default to BACKLOG enum type
 
-    
-
-    const user = await prisma.user.upsert({ //Check if demo user is already created adn store it in use
-        where: { email: DEMO_EMAIL }, //look for DEMO_EMAIL in database
-        update: {}, //if user email found, dont create new user (don't need to update either)
-        create: { email: DEMO_EMAIL, username: DEMO_USERNAME }, //if user email not found, create new user
-    });
+    const user = await requireCurrentUser();
 
     const existingGame = await prisma.game.findFirst({ //check game database for game that has the same title as submitted in the form
         where: {title: title}, //Find row with game title of title variable
@@ -86,9 +78,12 @@ export async function updateUserGame(formData: FormData) {
         throw new Error("Invalid progressPct Number")
     }
 
+    const user = await requireCurrentUser();
+
+
     //Update fields
     const result = await prisma.userGame.updateMany({ //Update many instances of userGame
-        where: {id}, //Update specifc to this ID
+        where: {id, userId: user.id}, //Update specifc to this ID
         data: { status, hoursPlayed, progressPct }, //Update the following fields
     });
 

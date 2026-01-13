@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/currentUser";
+import { requireCurrentUser } from "@/lib/currentUser";
 
 //Create custom list
 export async function createList(formData: FormData){
@@ -15,7 +15,7 @@ export async function createList(formData: FormData){
         throw new Error("Invalid  title")
     }
 
-    const user = await getCurrentUser();
+    const user = await requireCurrentUser();
 
     const newList = await prisma.list.create({
         data: {
@@ -37,7 +37,7 @@ export async function addGameToList(formData: FormData){
         throw new Error("Invalid listId or gameId");
     }
 
-    const user = await getCurrentUser(); //get current user
+    const user = await requireCurrentUser(); //get current user
 
     const list = await prisma.list.findFirst({ //Assign list based on userid and listid
         where: { id: listId, userId: user.id }
@@ -47,18 +47,21 @@ export async function addGameToList(formData: FormData){
         throw new Error("List not found");
     }
 
-    //get current list to assign new game position
-    const currentListItems = await prisma.listItem.findMany({
-        where: {id: listId},
-        
-    })
+    //TODO: DO POSITION SUTFF AFTER AUTH AND DATABASE API
+    // //Get list items from list
+    // const currentListItems = await prisma.list.findUnique({
+    //     where: {id: listId, userId: user.id},
+    //     include: {items: true},
+    // })
 
-    console.log("Position: " + currentListItems);
+    // //Get length position + 1
+    // const count = Number(currentListItems?.items.length) + 1;
+    
+    
     const temp = await prisma.listItem.create({ //insert game into list
         data: {
             listId,
             gameId,
-            position: currentListItems.length,
         },
     });  
 
@@ -74,7 +77,7 @@ export async function removeGameFromList(formData: FormData){
         throw new Error("Invalid listId or gameId");
     }
 
-    const user = await getCurrentUser(); //get current user
+    const user = await requireCurrentUser(); //get current user
 
     const list = await prisma.list.findFirst({ //Assign list based on userid and listid
         where: { id: listId, userId: user.id }
@@ -88,6 +91,8 @@ export async function removeGameFromList(formData: FormData){
         where: { listId, gameId}
     })
 
+    
+
     redirect(`/lists/${listId}`);
 }
 
@@ -96,7 +101,7 @@ export async function removeList(formData: FormData){
     const listId = String(formData.get("listId")).trim(); 
     
 
-    const user = await getCurrentUser();
+    const user = await requireCurrentUser();
 
     //Get list
     const listToBeDeleted = await prisma.list.findFirst({

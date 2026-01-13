@@ -1,11 +1,10 @@
 import Link from "next/link"; //Allows usable links
 import { prisma } from "@/lib/prisma"; //import prisma client to read DB
-import { updateUserGame } from "@/app/actions/library";
-import { getCurrentUser } from "@/lib/currentUser";
+import { requireCurrentUser } from "@/lib/currentUser";
 
 export default async function LibraryPage() { //async function for library page
    
-    const user = await getCurrentUser();
+    const user = await requireCurrentUser();
 
     const library = user 
         ? await prisma.userGame.findMany({ //Users game list 

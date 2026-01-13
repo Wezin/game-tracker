@@ -8,28 +8,92 @@ generator client {
   provider = "prisma-client-js"
 }
 
-datasource db { //declares the database 
-  provider = "postgresql" // 
+//declares the database
+datasource db {  
+  provider = "postgresql"
 }
 
-enum GameStatus { // Create status values
+// Create status values
+enum GameStatus { =
   BACKLOG
   PLAYING
   FINISHED
   DROPPED
 }
 
-model User { //User database table
+//User database table
+model User {
   id String @id @default(cuid()) //primary key (prisma auot generates uniquie string id)
   email String @unique // unique user email
-  username String @unique //user username
+
+  name String? //Display name (better auth)
+  emailVerified Boolean @default(false) //(Better auth)
+  image String? //optional avatar (better auth)
+
+  sessions Session[] //All login sessions for this user
+  account Account[]  //All auth accounts for this user
+
+  username String? @unique //user username
   userGames UserGame[] //User's games library
   list List[] //Users custom list
   createdAt DateTime @default(now()) //Date user was created (default to now)
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
 }
 
-model Game { //Game database table
+model Session {
+  id String @id @default(cuid())      //session row id
+  userId String                       //FK -> User.id (identify user of session)
+  token String @unique                //Session token stored in cookie
+  expiresAt DateTime                  //expiry Time for session
+  ipAddress String?                   //optional device ip
+  userAgent String?                    //optional device UA
+  createdAt DateTime @default(now())  //timestamps 
+  updatedAt DateTime @updatedAt       //timestamps
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade) //link to user
+
+  @@index([userId])                   // fast lookup by user
+}
+
+model Account {
+  id            String @id @default(cuid())     //account row id
+  userId        String                          //fk -> User.id
+  accountId     String                          //provider account id
+  providerId    String                          //Which proivder (google, github, email/password) the account uses
+  
+  //optional oauth tokens
+  accessToken   String?                         
+  refreshToken  String?                         
+  accessTokenExpireAt DateTime?                 
+  refreshTokenExpireAt DateTime?                
+  scope         String?                       
+  idToken       String?                         
+
+  password      String?                         //password hash for email/password
+  createdAt     DateTime @default(now())        //timestamp
+  updatedAt     DateTime @updatedAt             //timestamp
+
+  user          User @relation(fields: [userId], references: [id], onDelete: Cascade) //link to user
+
+  @@index([userId])                             //fast lookup by user
+  @@unique([providerId, accountId])             //unique per provider+account
+}
+
+model Verification {
+  id            String @id @default(cuid())     //verification row id
+  identifider   String                          //identifies who/what this verification is for(email or password reset)
+  value         String                          //Verification token
+  expiresAt     DateTime                        //token expiry time
+  createdAt     DateTime @default(now())                //creation timestamp
+  updatedAt     DateTime @updatedAt             //update timestamp
+
+  @@index([identifider])                        //Speeds up lookups by email/identifider
+
+}
+
+
+//Game database table
+model Game {
   id String @id @default(cuid()) //primary  key id
   title String //Game title
   coverUrl String? //optional cover art URL (can be null)
@@ -44,7 +108,8 @@ model Game { //Game database table
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
 }
 
-model UserGame { //Joined game and user table
+//Joined game and user table
+model UserGame {
   id String @id @default(cuid()) //primary key id for this library entry
   userId String //Foreign key pointing to User.id
   gameId String //Foreign key pointing to Game.id
@@ -62,7 +127,8 @@ model UserGame { //Joined game and user table
   @@unique([userId, gameId]) //Enforces: a user can only have a given game once in thier library
 }
 
-model List { //User created list
+//User created list
+model List {
   id String @id @default(cuid()) //unique list id
   userId String //User who owns the list
   name String //Name of the list
@@ -75,7 +141,8 @@ model List { //User created list
   items ListItem[] //All items that belong to this list
 }
 
-model ListItem { // Join table: Games inside list
+// Join table: Games inside list
+model ListItem {
   id String @id @default(cuid()) //Row id //IF MIGRATION ERROS I JUST ADDED @id
   listId String //Foreign key of which custom list (list.id)
   gameId String //Foreign key of which game in row (game.id)

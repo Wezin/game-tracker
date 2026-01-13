@@ -3,12 +3,12 @@
 
 
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/currentUser";
+import { requireCurrentUser } from "@/lib/currentUser";
 import { prisma } from "@/lib/prisma";
 import { removeList } from "@/app/actions/lists";
 
 export default async function ListsPage() {
-    const user = await getCurrentUser();
+    const user = await requireCurrentUser();
 
     const lists = user ? //Assign list to lists if exists
         await prisma.list.findMany({

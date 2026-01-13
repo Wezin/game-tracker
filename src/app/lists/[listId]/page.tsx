@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation"; //show 404 page
-import { getCurrentUser } from "@/lib/currentUser";
+import { requireCurrentUser } from "@/lib/currentUser";
 import { removeGameFromList } from "@/app/actions/lists";
 
 
@@ -12,7 +12,7 @@ export default async function DisplayList(
 
 ) {
     const { listId } = await params; //assign parameter(listId) to listId variable 
-    const user = await getCurrentUser(); //get current user
+    const user = await requireCurrentUser(); //get current user
 
 
 

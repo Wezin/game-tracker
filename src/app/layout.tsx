@@ -1,6 +1,7 @@
 import type { Metadata } from "next"; //import next.js page metadata
 import Link from "next/link"; //import next.js links compoenet for fast navigation
 import "./globals.css"; //import golbal css to apply styles
+import { signOutAction } from "./actions/auth";
 
 export const metadata: Metadata = { //exports defauly metadata(site info) for the whole app
   title: "GameTracker", //browser tab/page title
@@ -31,6 +32,10 @@ export default function RootLayout({ //App layout function
           <Link className="font-semibold hover:underline" href="/profile/testuser"> {/*Style the link*/}
             Profile {/*Text the user sees as the link*/}
           </Link>
+
+          <form action={signOutAction} method="POST"> {/* Log Out Button */}
+            <button className="font-semibold hover:underline cursor-pointer">Log Out</button>
+          </form>
 
           </nav>
           <main className="p-8"> {children}</main> 
