@@ -34,8 +34,13 @@ model User {
   account Account[]  //All auth accounts for this user
 
   username String? @unique //user username
+  bio String? //profile description
+
   userGames UserGame[] //User's games library
   list List[] //Users custom list
+
+  favourite FavouriteGame[] //user fave games
+
   createdAt DateTime @default(now()) //Date user was created (default to now)
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
 }
@@ -97,6 +102,7 @@ model Game {
   id String @id @default(cuid()) //primary  key id
   title String //Game title
   coverUrl String? //optional cover art URL (can be null)
+  igdbId Int @unique //igdb's id for the game
 
   description String? //null for now
   releaseDate DateTime? //null for now
@@ -104,6 +110,7 @@ model Game {
 
   ListItem ListItem[] //One game per custom List
   userGames UserGame[] //one game can appear in many users lists
+  favourite FavouriteGame[] //for fav game
   createdAt DateTime @default(now()) //Date game was created (default to now)
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
 }
@@ -125,6 +132,7 @@ model UserGame {
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
 
   @@unique([userId, gameId]) //Enforces: a user can only have a given game once in thier library
+  @@index([userId, status]) //speeds up filtering
 }
 
 //User created list
@@ -155,3 +163,20 @@ model ListItem {
   @@unique([listId, gameId]) //Prevent duplicates of the same game in one list
 }
 
+model FavouriteGame {
+  id String @id @default(cuid())
+
+  userId String
+  gameId String
+
+  position Int //Game ranking position
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, position]) //1 game per slot
+  @@unique([userId, gameId]) //same game cant be favourited twice
+  @@index([userId]) //fast user look up
+
+}

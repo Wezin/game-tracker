@@ -3,55 +3,70 @@
 import { prisma } from "@/lib/prisma"; //import Prisma client so we can talk to Postgres
 import { GameStatus } from "@prisma/client" //import statuses from db
 import { redirect } from "next/navigation"; // Redirects the uiser to another page after certain action finishes
-import {randomUUID} from "crypto" //built in node fucntion to generate unique IDs
 import { requireCurrentUser } from "@/lib/currentUser";
+import { getGameByIgdbId } from "@/lib/igdb";
 
 type AddGameState = {ok: boolean; error: string | null}; //Defines the state your form receives back from the actions
 
-export async function addGameToLibrary(prevState: AddGameState, formData: FormData): Promise<AddGameState>{ //Runs when a form submits with actions
-    const title = String(formData.get("title") || "").trim(); //Get title from form and remove extra spaces
-    const platform = String(formData.get("platform") || null).trim(); //Get platform form the form
-    const rawStatus = String(formData.get("status") || "BACKLOG").trim(); //Gets status typed from user, defaults to BACKLOG if empty
-    if (!title) { //if not title
-        return {ok: false, error: "Title is required"}; //return error instead of throwing
-    }
-    const status: GameStatus = //Declare status as the enum type prisma expects
-        rawStatus in GameStatus //Check if rawStatus matches a GameStatus
-            ? (GameStatus as any)[rawStatus] //Convert string to enum value if does
-            : GameStatus.BACKLOG; //if invalid, default to BACKLOG enum type
+//Add game to library
+export async function addGameToLibrary(formData: FormData){
+    const strIgdbId = String(formData.get("strIgdbId") ?? "").trim();
+    const strGameStatus = String(formData.get("status") ?? "").trim();
 
+    //Error check
+    if(!strIgdbId ) throw new Error("Invalid id");
+    if(!(strGameStatus in GameStatus)) throw new Error("Invalid game status");
+
+    
+
+    //get user
     const user = await requireCurrentUser();
 
-    const existingGame = await prisma.game.findFirst({ //check game database for game that has the same title as submitted in the form
-        where: {title: title}, //Find row with game title of title variable
+    //Turn igdbId to number
+    const igdbId = Number(strIgdbId);
+
+    //Assign status
+    const status: GameStatus = (GameStatus as any)[strGameStatus];
+
+    //Chekc if game is in db
+    const game = await prisma.game.findUnique({
+        where: { igdbId: igdbId },
     });
 
-    const game = existingGame ?? ( //if game is found, reuse it, otherwise create the game
-        await prisma.game.create({ //create new game row (insert new game into game table)
-            data: { //Data for the new game row
-                id: randomUUID(), //generate unique ID for game
-                title: title, // assign title to title.
-                coverUrl: null, //set cover art to null for now
+    //Store potential game
+    let ensuredGame = game; 
+
+    //If game doesnt exists, make it
+    if(!ensuredGame){
+        const igdbGame = await getGameByIgdbId(igdbId); //fetch game from igdb
+        if(!igdbGame) throw new Error("Igdb game not found"); //if game is not found, error
+        //Create game
+        ensuredGame = await prisma.game.create({
+            data: {
+                igdbId,
+                title: igdbGame.title,
+                coverUrl: igdbGame.coverUrl ?? null,
+                description: igdbGame.description ?? null,
+                releaseDate: igdbGame.releaseDate ?? null,
+                developer: igdbGame.developer ?? null,
             },
-        })
-    );
+        });
+    }
 
-    await prisma.userGame.upsert({
-        where: { userId_gameId: { userId: user.id, gameId: game.id}}, //search for game with specifed user id and game id
-        update: { status, platform: platform || null}, //if it exists, update the status and platform
-        create: { //if it doesnt exist, create it
+    //Update status of user's game, if not a userGame, create
+    const updateGameStatus = await prisma.userGame.upsert({
+        where: { userId_gameId: { userId: user.id, gameId: ensuredGame.id}},
+        update: { status: status },
+        create: {
             userId: user.id,
-            gameId: game.id,
-            status: status,
-            platform: platform,
-            hoursPlayed: 0,
-            progressPct: 0, 
-        }, 
+            gameId: ensuredGame.id,
+            status,
+        },
     });
 
-    redirect("/library"); //send the user back to the librarby page after inserting
-    
-} 
+     redirect(`/games/${igdbId}`);
+}
+
 
 //Update userGame
 

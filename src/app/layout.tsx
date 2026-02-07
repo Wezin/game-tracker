@@ -25,15 +25,19 @@ export default function RootLayout({ //App layout function
             Library {/*Text the user sees as the link*/} 
           </Link>
 
+          <Link className="font-semibold hover:underline" href="/games/search"> {/*Style the link*/}
+            Search {/*Text the user sees as the link*/} 
+          </Link>
+
           <Link className="font-semibold hover:underline" href="/lists"> {/*Style the link*/}
             Lists {/*Text the user sees as the link*/}
           </Link>
 
-          <Link className="font-semibold hover:underline" href="/profile/testuser"> {/*Style the link*/}
+          <Link className="font-semibold hover:underline" href="/profile"> {/*Style the link*/}
             Profile {/*Text the user sees as the link*/}
           </Link>
 
-          <form action={signOutAction} method="POST"> {/* Log Out Button */}
+          <form action={signOutAction}> {/* Log Out Button */}
             <button className="font-semibold hover:underline cursor-pointer">Log Out</button>
           </form>
 
