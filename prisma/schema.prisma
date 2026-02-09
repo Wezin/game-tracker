@@ -14,7 +14,7 @@ datasource db {
 }
 
 // Create status values
-enum GameStatus { =
+enum GameStatus {
   BACKLOG
   PLAYING
   FINISHED
