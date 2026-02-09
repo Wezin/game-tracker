@@ -7,7 +7,8 @@ export default defineConfig({
         path: "prisma/migrations", //location for migration folder
     },
     datasource: { //migration connection info
-        url: env ("DATABASE_URL"), //Read DATABASE_URL from env file
+        //url: env ("DATABASE_URL"), //Read DATABASE_URL from env file
+        url: env ("DIRECT_URL"), //Read DATABASE_URL from env file
     },
 });
 
