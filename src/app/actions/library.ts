@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma"; //import Prisma client so we can talk to Postgres
 import { GameStatus } from "@prisma/client" //import statuses from db
+console.log("TEst is it updated");
 import { redirect } from "next/navigation"; // Redirects the uiser to another page after certain action finishes
 import { requireCurrentUser } from "@/lib/currentUser";
 import { getGameByIgdbId } from "@/lib/igdb";
