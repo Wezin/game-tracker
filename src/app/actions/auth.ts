@@ -42,7 +42,7 @@ export async function signInAction(formData: FormData){
         console.log("inproper signin");
         redirect("/sign-up?error-signup_failed"); //signup error path
     }
-    redirect("/library"); //send to library page is signup works
+    redirect("/home"); //send to library page is signup works
 }
 
 //Sign out
