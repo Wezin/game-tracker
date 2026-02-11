@@ -23,7 +23,7 @@ export async function signUpAction(formData: FormData){
         console.log("unknown signup error");
         redirect("/sign-up?error-signup_failed");
     }
-    redirect("/library"); //send to library page is signup works
+    redirect("/home"); //send to library page is signup works
 }
 
 //Sign in
@@ -51,5 +51,5 @@ export async function signOutAction() {
         headers: await headers(),
     });
 
-    redirect("/");
+    redirect("/home");
 }

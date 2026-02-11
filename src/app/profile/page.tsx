@@ -19,6 +19,9 @@ export default async function ProfilePage() {
     orderBy: {position: "asc"},
   });
 
+  //make list of number of favs
+  const numberOfFavs = favs.map((_,index) => index + 1);
+
   //Count variables
   let gamePlayingCount = 0;
   let backlogGamesCount = 0;
@@ -52,7 +55,7 @@ export default async function ProfilePage() {
 
           {/*Options bar*/}
           <div className="flex mt-3 w-full rounded border p-4 gap-10 items-center justify-center">
-          <Link className="text-xl font-bold"href={"/profile"}>Profile</Link> 
+          <Link className="text-xl font-bold underline"href={"/profile"}>Profile</Link> 
           <Link className="text-xl font-bold"href={"/lists"}>Lists</Link> 
           <p className="text-xl font-bold">Backlog</p> 
           <p className="text-xl font-bold">Finished</p> 
@@ -63,16 +66,15 @@ export default async function ProfilePage() {
           <div className="mt-6"> 
             <div className="text-2xl font-medium mt-4">Favourite Games: </div>
             <div className="mt-2 flex gap-3">
-              {[1, 2, 3, 4, 5].map((pos) => {
+              {numberOfFavs.map((pos) => {
                 const fav = favs.find((f) => f.position === pos);
 
                 const coverBig = fav?.game.coverUrl ? igdbResizeImageUrl(fav.game.coverUrl, "t_cover_big") : null;
 
                 return (
-                  
                     <div key={pos}>
                       <Link href={`/games/${fav?.game.igdbId}`} className="group relative block">
-                        <div className="w-full aspect-[3/4] rounded border overflow-hidden flex text-xs text-gray-500"
+                        <div className="w-50 aspect-[3/4] rounded overflow-hidden flex text-xs text-gray-500"
                         >
                           {coverBig ? (
                             <img 

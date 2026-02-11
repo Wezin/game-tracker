@@ -36,7 +36,7 @@ export default async function HomePage() {
         <main className="p-8">
             <div className="text-center"> {/* Headers */}
                 <h1 className="text-4xl font-bold">Welcome To Your Own Personal Game's Library</h1>
-                <p className="text-sm text-gray-500">A Place To Personalize/Organize Your Library</p>
+                <p className="text-sm text-gray-400">**Single-User Demo**</p>
             </div>
 
             <div className="mt-15 flex items-center justify-center gap-25"> {/* info blocks */}
