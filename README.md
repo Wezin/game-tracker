@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Game Tracker
 
-## Getting Started
+A full-stack web app for organizing your personal video game library
 
-First, run the development server:
+Through custom lists, game statuses and a customizable profile, this app is designed to allow for the users to not only organize their games, but also express themselves through their library.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Live Demo Link
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Demo: https://game-tracker-psi-smoky.vercel.app/
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Search for games via IGDB and added them to your library
+- Personal games library with status tags (Backlog, Playing, Finished)
+- Create custom lists using games in your library
+- Profile page with bio, Top 5 pinned games, pinned lists, and recent activity
+- Authentication and persistent database (Supabase Postgres)
 
-## Learn More
+## Tools Used
 
-To learn more about Next.js, take a look at the following resources:
+- Next.js + TypeScript
+- Tailwind CSS
+- Prisma ORM + PostgreSQL (Supabase)
+- Better Auth
+- IGDB API (Twitch Token)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How To Run Locally
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Install Dependencies:
+   - npm install
+2. Create .env.local:
+   - DATABASE_URL=
+   - DIRECT_URL=
+   - BETTER_AUTH_SECRET=
+   - BETTER_AUTH_URL= http://localhost:3000
+   - TWITCH_CLIENT_ID=
+   - TWITCH_CLIENT_SECRET=
+3. Run migration and generate Prisma Client
+   - npx prisma migrate deploy
+   - npx prisma generate
+4. Start dev server
+   - npm run dev
 
-## Deploy on Vercel
+## Currnet Project Status
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Single user only demo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Future Plans
+
+- Reviews + Ratings
+- Cleaner UI/UX
+- Social Features (View other users profiles, follow users, public lists/reviews)
