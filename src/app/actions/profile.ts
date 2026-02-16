@@ -10,6 +10,7 @@ export async function editAccount(formData: FormData){
     const newName = String(formData.get("newName") || "").trim();
     const bio = String(formData.get("bio") || "").trim();
     const gameId = String(formData.get("gameId") || "").trim();
+    const listId = String(formData.get("listId") || "").trim();
     const rawPosition = String(formData.get("position") || "").trim();
     
     
@@ -33,7 +34,25 @@ export async function editAccount(formData: FormData){
     //Check if the user wants to add the same game twice
     const unqiueCheck = new Set(favs.map((f) => f.gameId)); //Make set list of fav games (set deletes duplicates)
     //if unique list is not the same size of fav games list, that means fav games has duplicates
-    if(unqiueCheck.size !== favs.length) throw new Error("Duplicate favourite Game");
+    if(unqiueCheck.size !== favs.length) redirect("/profile/edit?error=duplicate_fav");
+
+    //Edit USers pinned lists
+    //Make list of users chosen pinned lists 
+    const pList: Array<{ position: number; listId: string }> = [];
+
+
+    //Loop throuhg each potential 
+    for(let pos = 1; pos <= 3; pos++){
+        const listId = String(formData.get(`pin${pos}listId`) ?? "").trim();
+
+        //if the form data recived something, push id into favs list
+        if(listId) pList.push({position: pos, listId});
+    }
+
+    //Check if the user wants to add the same game twice
+    const unqiueCheckList = new Set(pList.map((f) => f.listId)); //Make set list of fav games (set deletes duplicates)
+    //if unique list is not the same size of fav games list, that means fav games has duplicates
+    if(unqiueCheckList.size !== pList.length) redirect("/profile/edit?error=duplicate_pinned");
 
 
     await prisma.$transaction(async (tx) => {
@@ -50,6 +69,23 @@ export async function editAccount(formData: FormData){
                     userId: user.id,
                     gameId: f.gameId,
                     position: f.position 
+                },
+            });
+        }
+
+        //Pinned list
+        //Delete all existing favourite games
+        await tx.pinnedList.deleteMany({
+            where: {userId: user.id},
+        });
+
+        //Add new fav games
+        for(const p of pList){
+            await tx.pinnedList.create({
+                data: {
+                    userId: user.id,
+                    listId: p.listId,
+                    position: p.position 
                 },
             });
         }

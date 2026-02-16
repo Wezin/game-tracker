@@ -38,8 +38,9 @@ model User {
 
   userGames UserGame[] //User's games library
   list List[] //Users custom list
-
+  pinned PinnedList[] //pinned lists
   favourite FavouriteGame[] //user fave games
+  activity Activity[] //tracking user activity
 
   createdAt DateTime @default(now()) //Date user was created (default to now)
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
@@ -111,6 +112,8 @@ model Game {
   ListItem ListItem[] //One game per custom List
   userGames UserGame[] //one game can appear in many users lists
   favourite FavouriteGame[] //for fav game
+  activity Activity[] //for gaem activity tracking
+
   createdAt DateTime @default(now()) //Date game was created (default to now)
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
 }
@@ -126,7 +129,7 @@ model UserGame {
   progressPct Int @default(0) //Progress percentage (default to 0)
 
   user User @relation(fields: [userId], references: [id]) //Defines relation + FK details to User
-  game Game @relation(fields: [gameId], references: [id]) //Defines relation + FK details to Game
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade) //Defines relation + FK details to Game
   
   createdAt DateTime @default(now()) //Date created (default to now)
   updatedAt DateTime @updatedAt //Automatically update whenever row changes
@@ -145,6 +148,7 @@ model List {
   createdAt DateTime @default(now()) //When the list was created
   updatedAt DateTime @updatedAt //Time it was updatedAt
 
+  pinned PinnedList[] //for pinned list
   user User @relation(fields: [userId], references: [id]) //connect list -> user
   items ListItem[] //All items that belong to this list
 }
@@ -158,7 +162,7 @@ model ListItem {
   createdAt DateTime @default(now()) //Time created
 
   list List @relation(fields: [listId], references: [id]) //connect item to list
-  game Game @relation(fields: [gameId], references: [id]) //connects item to game
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade) //connects item to game
 
   @@unique([listId, gameId]) //Prevent duplicates of the same game in one list
 }
@@ -179,4 +183,43 @@ model FavouriteGame {
   @@unique([userId, gameId]) //same game cant be favourited twice
   @@index([userId]) //fast user look up
 
+}
+
+model PinnedList {
+  id String @id @default(cuid())
+
+  userId String 
+  listId String
+
+  position Int //list ranking position
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, position]) //1 game per slot
+  @@unique([userId, listId]) //same list cant be favourited twice
+  @@index([userId]) //fast user look up
+
+}
+
+enum ActivityType {
+  LIBRARY_ADD //first time game enters library
+  STATUS_CHANGE //status change 
+}
+
+model Activity {
+  id String @id @default(cuid())
+  userId String //user that made the change
+  type ActivityType //Type of change
+  gameId String //Game related to change
+  createdAt DateTime @default(now()) //when it happened
+  status GameStatus //game status
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game Game @relation(fields: [gameId], references: [id], onDelete: Restrict)
+  
+
+  @@index([userId, createdAt])
+  @@index([gameId])
 }

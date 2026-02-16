@@ -32,7 +32,7 @@ export default async function ListsPage() {
                 <h1 className="text-2xl font-bold">Lists</h1>
                 <Link className="mt-4 text-sm text-gray-500 underline" href="lists/add">Create List</Link>
             </div>
-            { lists.length === 0 ? (<div className="mt-10 font-bold">Users has no custom lists</div>
+            { lists.length === 0 ? (<div className="mt-6 text-gray-500 font-medium">Users has no custom lists</div>
             ) : (
                 <ul className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"> {/* list of all custom lists */}
                     { lists.map((entry) => (

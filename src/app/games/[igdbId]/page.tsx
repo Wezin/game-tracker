@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma"; //Pull from database
 import { notFound } from "next/navigation"; //show 404 page
 import BackButton from "../BackButton";
 import { getGameByIgdbId, igdbResizeImageUrl } from "@/lib/igdb";
-import { addGameToLibrary } from "@/app/actions/library";
+import { addGameToLibrary, deleteGameFromLibrary } from "@/app/actions/library";
 import { GameStatus } from "@prisma/client";
 import { requireCurrentUser } from "@/lib/currentUser";
 
@@ -108,10 +108,23 @@ export default async function GamePage(
                             <div className="text-sm text-gray-500">{releaseDateString}</div>
                         </div>
 
-                        <div> {/* Game Developer block */}
-                            <div className="text-sm font-medium">Developer</div>
-                            <div className="text-sm text-gray-500">{game.developer ?? "No developer yet"}</div>
-                        </div> 
+                        {/* Delte Game */}
+                        {userGame ? ( //if game is in users library
+                                <form action={deleteGameFromLibrary}>
+                                    <input type="hidden" name="igdbGameId" value={igdbId} />
+                                    <button 
+                                        type="submit"
+                                        name="toBeDeleted"
+                                        value={userGame.gameId}
+                                        className="text-sm underline cursor-pointer"   
+                                    >
+                                        Remove From Library
+                                    </button>
+                                </form>
+
+                            ) : (
+                                <p></p>
+                            )}
                     </div>                 
                 </div>
                 <div> {/* Buttons */}

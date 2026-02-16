@@ -9,7 +9,10 @@ export default function BackButton(){
         
         <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => {
+                router.back();
+                setTimeout(() => router.refresh(), 0) //force refresh on page its going back to
+            }}
             className="text-sm underline cursor-pointer"       
         >
             Back

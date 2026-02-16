@@ -44,7 +44,7 @@ export default async function LibraryPage(
         <main className="p-8"> {/* */}
             <div className="flex items-center justify-between"> {/* Header row layout */}
                 <h1 className="text-2xl font-bold">My Library</h1> {/* Page title */}
-                <Link className="underline" href="/games/search"> Add Game</Link> {/* Link to add game */}
+                <Link className="underline" href="/games/search"> Search Games</Link> {/* Link to add game */}
             </div>
             <div className="flex gap-4"> {/* Filtering */}
                 <Link 
@@ -79,7 +79,7 @@ export default async function LibraryPage(
             </div>
             {/* If not games, display the following */}
             {library.length === 0 ? (
-                <p className="mt-4 text-gray-500"> No games yet. Click "Add Game" to add your first game</p> // If game list empty, display this prompt
+                <p className="mt-4 text-gray-500"> No games yet. Click "Search Games" to find some games</p> // If game list empty, display this prompt
                 ) : (
                     <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:gird-cols-7 gap-4">
                         {library.map((entry) => {

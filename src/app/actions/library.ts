@@ -1,11 +1,11 @@
 "use server"; // Marks this files exproted functions as Server Actions (Run on server, not browser)
 
 import { prisma } from "@/lib/prisma"; //import Prisma client so we can talk to Postgres
-console.log("TESTYESTES");
-import { GameStatus } from "@prisma/client"; //import statuses from db
+import { GameStatus, ActivityType } from "@prisma/client"; //import statuses from db
 import { redirect } from "next/navigation"; // Redirects the uiser to another page after certain action finishes
 import { requireCurrentUser } from "@/lib/currentUser";
 import { getGameByIgdbId } from "@/lib/igdb";
+import { statusCodes } from "better-auth";
 
 type AddGameState = {ok: boolean; error: string | null}; //Defines the state your form receives back from the actions
 
@@ -17,7 +17,6 @@ export async function addGameToLibrary(formData: FormData){
     //Error check
     if(!strIgdbId ) throw new Error("Invalid id");
     if(!(strGameStatus in GameStatus)) throw new Error("Invalid game status");
-
     
 
     //get user
@@ -28,6 +27,7 @@ export async function addGameToLibrary(formData: FormData){
 
     //Assign status
     const status: GameStatus = (GameStatus as any)[strGameStatus];
+    //const activityChangeType: ActivityType = (ActivityType as any);
 
     //Chekc if game is in db
     const game = await prisma.game.findUnique({
@@ -35,12 +35,14 @@ export async function addGameToLibrary(formData: FormData){
     });
 
     //Store potential game
-    let ensuredGame = game; 
+    let ensuredGame = game;
+    let newGameToLibrary = "";
 
-    //If game doesnt exists, make it
+    //If game doesnt exist, make it
     if(!ensuredGame){
         const igdbGame = await getGameByIgdbId(igdbId); //fetch game from igdb
         if(!igdbGame) throw new Error("Igdb game not found"); //if game is not found, error
+
         //Create game
         ensuredGame = await prisma.game.create({
             data: {
@@ -54,14 +56,43 @@ export async function addGameToLibrary(formData: FormData){
         });
     }
 
-    //Update status of user's game, if not a userGame, create
-    const updateGameStatus = await prisma.userGame.upsert({
+    //Check if 
+    const existsInUserGame = await prisma.userGame.findUnique({
         where: { userId_gameId: { userId: user.id, gameId: ensuredGame.id}},
-        update: { status: status },
-        create: {
+    })
+
+    //If game is not in users library, create it
+    if(!existsInUserGame){
+        await prisma.userGame.create({
+            data: {
+                userId: user.id,
+                gameId: ensuredGame.id,
+                status,
+            },
+        });
+        //New to library activity
+        newGameToLibrary = "LIBRARY_ADD";
+    }else{ //if game is already in users library
+        await prisma.userGame.update({
+            where: {userId_gameId: {userId: user.id, gameId: ensuredGame.id}},
+            data: {status},
+        });
+        //Activity for game already in users library
+        newGameToLibrary = "STATUS_CHANGE";
+    }
+    
+
+
+    //Determine type of activity update
+    //const activityChangeType = newGameToLibrary as ActivityType;
+
+    //Track activity
+    await prisma.activity.create({
+        data: {
             userId: user.id,
             gameId: ensuredGame.id,
-            status,
+            type: newGameToLibrary as ActivityType,
+            status: status,
         },
     });
 
@@ -111,4 +142,24 @@ export async function updateUserGame(formData: FormData) {
 }
 
 //delete game from library function later
+export async function deleteGameFromLibrary(formData: FormData){
+    const gameid = String(formData.get("toBeDeleted")).trim();
+    const igdbId = String(formData.get("igdbGameId")).trim();
+
+    const user = await requireCurrentUser();
+
+    const game = await prisma.userGame.findFirst({
+        where: {userId: user.id, gameId: gameid},
+    });
+
+    if(!game) throw new Error("Game not found");
+
+
+    //Delete from everything
+    await prisma.userGame.deleteMany({
+        where: {userId: user.id, gameId: gameid},
+    });
+
+    redirect(`/games/${igdbId}`);
+}
 

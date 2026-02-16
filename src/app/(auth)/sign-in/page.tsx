@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/currentUser";
 
 export default async function signUpDisplay(){
     const user = await getCurrentUser();
-    if(user) redirect("/library");
+    if(user) redirect("/home");
 
 
     return(
